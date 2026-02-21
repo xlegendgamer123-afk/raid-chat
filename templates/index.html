@@ -119,15 +119,17 @@
 <div style="padding:15px; background:#0f0f0f;">
     <div class="sub-title">Live Chat Room</div>
 </div>
+{% if request.args.get('video') %}
 <div id="video-wrapper">
     <div class="video-container">
         <iframe 
-            src="https://www.youtube.com/embed/YOUR_VIDEO_ID"
+            src="https://www.youtube.com/embed/{{ request.args.get('video') }}"
             frameborder="0"
             allowfullscreen>
         </iframe>
     </div>
 </div>
+{% endif %}
 
 <div id="chat-box"></div>
 
