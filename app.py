@@ -4,6 +4,7 @@ import sqlite3
 
 app = Flask(__name__)
 ADMIN_PASSWORD = "collumanish89"
+CHAT_ENABLED = True
 # Create database
 def init_db():
     conn = sqlite3.connect("messages.db")
@@ -27,6 +28,11 @@ def index():
 
 @app.route("/send", methods=["POST"])
 def send():
+    global CHAT_ENABLED
+
+    if not CHAT_ENABLED:
+        return "Chat is disabled", 403
+    
     name = request.form["name"].strip()
     message = request.form["message"].strip()
 
@@ -109,6 +115,17 @@ def get_messages():
     messages = c.fetchall()
     conn.close()
     return jsonify(messages)
+
+@app.route("/toggle_chat", methods=["POST"])
+def toggle_chat():
+    global CHAT_ENABLED
+    password = request.form.get("password")
+
+    if password != ADMIN_PASSWORD:
+        return "Unauthorized", 403
+
+    CHAT_ENABLED = not CHAT_ENABLED
+    return "", 204
 
 if __name__ == "__main__":
     app.run()

@@ -96,6 +96,7 @@
     </div>
 
     <button onclick="clearChat()">Clear Chat</button>
+    <button onclick="toggleChat()">Toggle Chat</button>
 
 </header>
 
@@ -149,6 +150,17 @@ function clearChat() {
         } else {
             alert("Unauthorized or error");
         }
+    });
+}
+function toggleChat() {
+    fetch('/toggle_chat', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: `password=${password}`
+    }).then(() => {
+        alert("Chat status toggled");
     });
 }
 function getColorFromName(name) {
