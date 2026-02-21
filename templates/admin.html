@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Panel - Raid Chat</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #0f0f0f;
+            color: white;
+        }
+
+        header {
+            background: #1a1a1a;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+        }
+
+        header h2 {
+            margin: 0;
+        }
+
+        button {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 20px;
+            background: #ff4444;
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        button:hover {
+            background: #ff2222;
+        }
+
+        #chat-box {
+            max-width: 900px;
+            margin: 20px auto;
+            padding: 10px;
+        }
+
+        .message {
+            background: #1c1c1c;
+            padding: 10px 15px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+        }
+
+        .name {
+            color: #00bfff;
+            font-weight: bold;
+        }
+
+        .time {
+            font-size: 12px;
+            color: gray;
+            margin-left: 5px;
+        }
+
+        .message-text {
+            margin-top: 5px;
+        }
+
+        .glow-title {
+            font-size: 28px;
+            font-weight: bold;
+            text-align: center;
+            color: #00ffff;
+            text-shadow:
+                0 0 5px #01d5d5,
+                0 0 10px #00ffff,
+                0 0 20px #00bfff,
+                0 0 40px #00befeec;
+        }
+
+        .sub-title {
+            text-align: center;
+            color: #aaa;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+
+<header style="display: flex; justify-content: space-between; align-items: center; padding: 15px; background:#1a1a1a;">
+    
+    <div style="padding:15px; ">
+        <div class="glow-title">Collusion Gamer</div>
+        <div class="sub-title">Live Chat Room</div>
+    </div>
+
+    <button onclick="clearChat()">Clear Chat</button>
+
+</header>
+
+<div id="chat-box"></div>
+
+<script>
+const password = "{{ request.args.get('password') }}";
+
+function loadMessages() {
+    fetch('/get_messages')
+    .then(res => res.json())
+    .then(data => {
+
+        let box = document.getElementById("chat-box");
+        box.innerHTML = "";
+
+        data.reverse().slice(0, 100).forEach(msg => {
+
+            let username = msg[0];
+
+            // Generate consistent color from name
+            let color = getColorFromName(username);
+
+            box.innerHTML += `
+                <div class="message">
+                    <span class="name" style="color:${color}">
+                        ${username}
+                    </span>
+                    <span class="time">${msg[2]}</span>
+                    <div class="message-text">${msg[1]}</div>
+                </div>
+            `;
+        });
+
+    });  // 🔥 THIS WAS MISSING
+}
+
+function clearChat() {
+    if (!confirm("Are you sure you want to clear chat?")) return;
+
+    fetch('/clear', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: `password=${password}`
+    })
+    .then(response => {
+        if (response.status === 204) {
+            loadMessages();
+        } else {
+            alert("Unauthorized or error");
+        }
+    });
+}
+function getColorFromName(name) {
+    let colors = [
+        "#ff4d4d", "#00ffcc", "#ffcc00",
+        "#ff66ff", "#66ff66", "#ff9966",
+        "#66ccff", "#ff3399", "#cc66ff"
+    ];
+
+    let hash = 0;
+    for (let i = 0; i < name.length; i++) {
+        hash = name.charCodeAt(i) + ((hash << 5) - hash);
+    }
+
+    return colors[Math.abs(hash) % colors.length];
+}
+setInterval(loadMessages, 2000);
+loadMessages();
+</script>
+
+</body>
+</html>
